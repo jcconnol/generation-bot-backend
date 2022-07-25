@@ -1,0 +1,24 @@
+service: generation-bot-dev
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-2
+  lambdaHashingVersion: '20201221'
+  iam:
+    role:
+      managedPolicies:
+        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+        - 'arn:aws:iam::aws:policy/AWSLambda_FullAccess'
+
+functions:
+  gen-bot-api-create:
+    name: dev-gen-bot
+    handler: index.handler
+    events:
+      - http:
+          path: api/generate
+          method: get
+          cors: true
+          private: false
