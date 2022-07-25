@@ -1,0 +1,8 @@
+
+MAX_WORD_COUNT = 100;
+PHRASE_COUNT = 5
+
+module.exports = {
+    MAX_WORD_COUNT,
+    PHRASE_COUNT
+};
