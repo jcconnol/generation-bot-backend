@@ -24,7 +24,8 @@ exports.handler = async (event) => {
 
     let hasMoreFields = await hasExtraFields(eventBody, {
         "category":"1",
-        "wordCount":"1"
+        "wordCount":"1",
+        "siteName":"1"
     });
 
     if(hasMoreFields){
@@ -37,6 +38,7 @@ exports.handler = async (event) => {
 
     let category = eventBody.category;
     let wordCount = eventBody.wordCount;
+    let siteName = eventBody.siteName;
     
     switch(category) {
         case "poem":
@@ -45,10 +47,12 @@ exports.handler = async (event) => {
         case "tweets":
             bucketKey = "tweets.json"
             break;
+        case "site":
+            bucketKey = `site-${siteName}.json`
+            break;
         default:
             bucketKey = ""
     }
-
 
     let params = {Bucket: 'bot-gen', Key: bucketKey}
 
@@ -60,17 +64,22 @@ exports.handler = async (event) => {
         console.log(s3PoemResponse);
     }
     else{
-        let s3Obj = JSON.parse(s3PoemResponse.Body);
-        let phraseArray = []
+        try {
+            let s3Obj = JSON.parse(s3PoemResponse.Body);
+            let phraseArray = []
 
-        for(var i = 0; i < def.PHRASE_COUNT; i++){
-            phrase = await buildPhrase(s3Obj, wordCount);
-            phraseArray.push(phrase)
+            for(var i = 0; i < def.PHRASE_COUNT; i++){
+                phrase = await buildPhrase(s3Obj, wordCount);
+                phraseArray.push(phrase)
+            }
+
+            response = responses(200, JSON.stringify({
+                phrases: phraseArray
+            }));
+        } catch (error) {
+            console.log(error);
+            return responses(500, "Server error");
         }
-
-        response = responses(200, {
-            phrases: phraseArray
-        });
     }
 
     return response;
@@ -93,20 +102,25 @@ async function buildPhrase(wordObj, maxCount) {
     let randomFirstWord = randomProperty(wordObj);
     message = randomFirstWord;
     let wordArray = wordObj[randomFirstWord]
-
+    console.log("start building...")
     for (let index = 0; index < maxCount-1; index++) {
-        if(!wordArray.length){
+        if(!wordArray || !wordArray.length){
             break;
         }
 
         let randomIndex = Math.floor(Math.random()*wordArray.length)
         let randomWord = wordArray[randomIndex]
+        
+        if(Array.isArray(randomWord)){
+            console.log(randomWord);
+            console.log(randomIndex)
+        }
 
         message += ' ' + randomWord
 
         wordArray = wordObj[randomWord]
     }
-     
+     console.log("stopped building")
     return message;
 }
 

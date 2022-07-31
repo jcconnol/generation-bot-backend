@@ -19,6 +19,7 @@ functions:
     events:
       - http:
           path: api/generate
-          method: get
+          method: post
           cors: true
           private: false
+

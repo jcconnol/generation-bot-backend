@@ -10,6 +10,25 @@ async function runGetPoemCheck(){
 
     console.log(response);
 
+    response = await scheduler.handler({
+        "body": JSON.stringify({
+            category: "site",
+            wordCount: 45,
+            siteName: "ramseysolutions"
+        })
+    });
+
+    console.log(response);
+
+    response = await scheduler.handler({
+        "body": JSON.stringify({
+            category: "tweets",
+            wordCount: 45
+        })
+    });
+
+    console.log(response);
+
     return response;
 }
 
