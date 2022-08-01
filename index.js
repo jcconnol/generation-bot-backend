@@ -102,7 +102,7 @@ async function buildPhrase(wordObj, maxCount) {
     let randomFirstWord = randomProperty(wordObj);
     message = randomFirstWord;
     let wordArray = wordObj[randomFirstWord]
-    console.log("start building...")
+
     for (let index = 0; index < maxCount-1; index++) {
         if(!wordArray || !wordArray.length){
             break;
@@ -110,21 +110,19 @@ async function buildPhrase(wordObj, maxCount) {
 
         let randomIndex = Math.floor(Math.random()*wordArray.length)
         let randomWord = wordArray[randomIndex]
-        
-        if(Array.isArray(randomWord)){
-            console.log(randomWord);
-            console.log(randomIndex)
-        }
 
         message += ' ' + randomWord
 
         wordArray = wordObj[randomWord]
     }
-     console.log("stopped building")
+    
     return message;
 }
 
 function randomProperty (obj) {
     var keys = Object.keys(obj);
-    return obj[keys[ keys.length * Math.random() << 0]];
+    var randomIndex = Math.floor(Math.random()*keys.length);
+    var randomProperty = keys[randomIndex];
+
+    return randomProperty;
 };
