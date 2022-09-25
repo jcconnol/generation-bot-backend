@@ -29,6 +29,15 @@ async function runGetPoemCheck(){
 
     console.log(response);
 
+    response = await scheduler.handler({
+        "body": JSON.stringify({
+            category: "rapSong",
+            wordCount: 45
+        })
+    });
+
+    console.log(response);
+
     return response;
 }
 

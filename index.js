@@ -50,6 +50,9 @@ exports.handler = async (event) => {
         case "site":
             bucketKey = `site-${siteName}.json`
             break;
+        case "rapSong":
+            bucketKey = `rapSongs.json`
+            break;
         default:
             bucketKey = ""
     }
