@@ -1,21 +1,12 @@
-//TODO retrieve data from S3 bucket based on category from input
-//Create object for S3 bucket
-//TODO add poem bucket
-//TODO add tweet generation
-//TODO add songs generation - different genres
-//TODO website one
-
 var responses = require('./responses');
 var AWS = require('aws-sdk');
 const def = require('./definitions')
 
 AWS.config.update({region: 'us-east-2'});
 
-//TODO set variable for s3 response here
-let s3Response;
-
 exports.handler = async (event) => {
     console.log(event);
+    let s3Response;
     let s3 = new AWS.S3({apiVersion: '2006-03-01'});
     let response = responses(400, "generation data not retrieved");
     let bucketKey;
@@ -63,17 +54,24 @@ exports.handler = async (event) => {
     let params = {Bucket: 'bot-gen', Key: bucketKey}
 
     if(!s3Response){
+        //way 1 attempt
         s3Response = await s3.getObject(params).promise();
     }
     
     if(!s3Response.Body){
-        console.log(s3Response);
+        console.log("s3Response");
     }
     else{
         try {
-            console.log(s3Response);
-            //TODO something wrong here?
-            let s3ResponseBody = await s3Response.Body.toString('utf-8'); 
+            console.log("s3Response");
+            let s3ResponseBody;
+            if(typeof(s3Response) != "string"){
+                s3ResponseBody = await streamToString(s3Response.Body)
+            }
+            else{
+                s3ResponseBody = await s3Response.Body.toString('utf-8'); 
+            }
+            
             console.log(typeof(s3ResponseBody));
             let s3Obj = await JSON.parse(s3ResponseBody);
             let phraseArray = []
@@ -135,4 +133,12 @@ function randomProperty (obj) {
     var randomProperty = keys[randomIndex];
 
     return randomProperty;
-};
+}
+
+const streamToString = (stream) =>
+    new Promise((resolve, reject) => {
+      const chunks = [];
+      stream.on("data", (chunk) => chunks.push(chunk));
+      stream.on("error", reject);
+      stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
+});
