@@ -54,7 +54,6 @@ exports.handler = async (event) => {
     let params = {Bucket: 'bot-gen', Key: bucketKey}
 
     if(!s3Response){
-        //way 1 attempt
         s3Response = await s3.getObject(params).promise();
     }
     
@@ -65,21 +64,10 @@ exports.handler = async (event) => {
         try {
             console.log("s3Response");
             let s3ResponseBody;
-            if(typeof(s3Response) != "string"){
-                s3ResponseBody = await streamToString(s3Response.Body)
-            }
-            else{
-                s3ResponseBody = await s3Response.Body.toString('utf-8'); 
-            }
             
-            console.log(typeof(s3ResponseBody));
-            let s3Obj = await JSON.parse(s3ResponseBody);
-            let phraseArray = []
-
-            for(var i = 0; i < def.PHRASE_COUNT; i++){
-                phrase = await buildPhrase(s3Obj, wordCount);
-                phraseArray.push(phrase)
-            }
+            s3ResponseBody = await s3Response.Body.toString('utf-8'); 
+            
+            let phraseArray = await parseGeneratedText(s3ResponseBody);
 
             response = responses(200, JSON.stringify({
                 phrases: phraseArray
@@ -127,18 +115,6 @@ async function buildPhrase(wordObj, maxCount) {
     return message;
 }
 
-function randomProperty (obj) {
-    var keys = Object.keys(obj);
-    var randomIndex = Math.floor(Math.random()*keys.length);
-    var randomProperty = keys[randomIndex];
-
-    return randomProperty;
+async function parseGeneratedText(fullString){
+    return fullString.split("\n||||||||||\n")
 }
-
-const streamToString = (stream) =>
-    new Promise((resolve, reject) => {
-      const chunks = [];
-      stream.on("data", (chunk) => chunks.push(chunk));
-      stream.on("error", reject);
-      stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-});
