@@ -68,6 +68,7 @@ exports.handler = async (event) => {
             s3ResponseBody = await s3Response.Body.toString('utf-8'); 
             
             let phraseArray = await parseGeneratedText(s3ResponseBody);
+            console.log(phraseArray)
 
             response = responses(200, JSON.stringify({
                 phrases: phraseArray
