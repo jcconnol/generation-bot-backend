@@ -1,6 +1,8 @@
 var responses = require('./responses');
 var AWS = require('aws-sdk');
-const def = require('./definitions')
+const def = require('./definitions');
+const { GetObjectCommand, S3Client } = require('@aws-sdk/client-s3')
+const client = new S3Client()
 
 AWS.config.update({region: 'us-east-2'});
 
@@ -33,19 +35,19 @@ exports.handler = async (event) => {
     
     switch(category) {
         case "poem":
-            bucketKey = "poem.json"
+            bucketKey = "poems.txt"
             break;
         case "tweets":
-            bucketKey = "tweets.json"
+            bucketKey = "tweets.txt"
             break;
         case "site":
-            bucketKey = `site-${siteName}.json`
+            bucketKey = `site-${siteName}.txt`
             break;
         case "rapSong":
-            bucketKey = "rapSongs.json"
+            bucketKey = "rapSongs.txt"
             break;
         case "rapSongs":
-            bucketKey = "rapSongs.json"
+            bucketKey = "rapSongs.txt"
             break;
         default:
             bucketKey = ""
@@ -53,42 +55,32 @@ exports.handler = async (event) => {
 
     let params = {Bucket: 'bot-gen', Key: bucketKey}
 
-    if(!s3Response){
-        //way 1 attempt
-        s3Response = await s3.getObject(params).promise();
-    }
     
-    if(!s3Response.Body){
-        console.log("s3Response");
-    }
-    else{
+    
+    
+    // if(!s3Response.Body){
+    //     console.log("s3Response");
+    // }
+    // else{
         try {
-            console.log("s3Response");
-            let s3ResponseBody;
-            if(typeof(s3Response) != "string"){
-                s3ResponseBody = await streamToString(s3Response.Body)
-            }
-            else{
-                s3ResponseBody = await s3Response.Body.toString('utf-8'); 
-            }
+            // const command = new GetObjectCommand(params);
+            s3Response = await getObject("bot-gen", bucketKey)
             
-            console.log(typeof(s3ResponseBody));
-            let s3Obj = await JSON.parse(s3ResponseBody);
-            let phraseArray = []
+            console.log("s3Response");
+            console.log(s3Response)
 
-            for(var i = 0; i < def.PHRASE_COUNT; i++){
-                phrase = await buildPhrase(s3Obj, wordCount);
-                phraseArray.push(phrase)
+            let phraseArray = s3Response.split("\n||||||||||||||||||||||||||\n")
+            if (phraseArray.length < 1){
+                throw new Error('No phrases were returned')
             }
 
-            response = responses(200, JSON.stringify({
+            response = responses(200, {
                 phrases: phraseArray
-            }));
+            });
         } catch (error) {
             console.log(error);
-            return responses(500, "Server error");
+            return responses(500, error);
         }
-    }
 
     return response;
 }
@@ -135,10 +127,29 @@ function randomProperty (obj) {
     return randomProperty;
 }
 
-const streamToString = (stream) =>
-    new Promise((resolve, reject) => {
-      const chunks = [];
-      stream.on("data", (chunk) => chunks.push(chunk));
-      stream.on("error", reject);
-      stream.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
-});
+function getObject (Bucket, Key) {
+  return new Promise(async (resolve, reject) => {
+    const getObjectCommand = new GetObjectCommand({ Bucket, Key })
+
+    try {
+      const response = await client.send(getObjectCommand)
+  
+      // Store all of data chunks returned from the response data stream 
+      // into an array then use Array#join() to use the returned contents as a String
+      let responseDataChunks = []
+
+      // Handle an error while streaming the response body
+      response.Body.once('error', err => reject(err))
+  
+      // Attach a 'data' listener to add the chunks of data to our array
+      // Each chunk is a Buffer instance
+      response.Body.on('data', chunk => responseDataChunks.push(chunk))
+  
+      // Once the stream has no more data, join the chunks into a string and return the string
+      response.Body.once('end', () => resolve(responseDataChunks.join('')))
+    } catch (err) {
+      // Handle the error or throw
+      return reject(err)
+    } 
+  })
+}

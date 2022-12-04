@@ -1,1 +1,1 @@
-# generation-bot-backend
+# generation-bot-retrieval-lambda
