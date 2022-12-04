@@ -1,12 +1,12 @@
 var scheduler = require('./index');
 
 async function runGetPoemCheck(){
-    // let response = await scheduler.handler({
-    //     "body": JSON.stringify({
-    //         category: "poem",
-    //         wordCount: 45
-    //     })
-    // });
+    let response = await scheduler.handler({
+        "body": JSON.stringify({
+            category: "poem",
+            wordCount: 45
+        })
+    });
 
     // console.log(response);
 
@@ -29,14 +29,14 @@ async function runGetPoemCheck(){
 
     // console.log(response);
 
-    response = await scheduler.handler({
-        "body": JSON.stringify({
-            category: "rapSong",
-            wordCount: 45
-        })
-    });
+    // response = await scheduler.handler({
+    //     "body": JSON.stringify({
+    //         category: "rapSong",
+    //         wordCount: 45
+    //     })
+    // });
 
-    console.log(response);
+    // console.log(response);
 
     return response;
 }

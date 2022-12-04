@@ -60,16 +60,18 @@ exports.handler = async (event) => {
         s3Response = await getObject("bot-gen", bucketKey)
         
         console.log("s3Response");
-        console.log(s3Response)
+        console.log(s3Response.substr(0,155))
 
         let phraseArray = s3Response.split("\n||||||||||||||||||||||||||\n")
         if (phraseArray.length < 1){
+            console.log("No Phrases returned");
             throw new Error('No phrases were returned')
         }
 
-        response = responses(200, {
+        response = responses(200, JSON.stringify({
             phrases: phraseArray
-        });
+        }));
+
     } catch (error) {
         console.log(error);
         return responses(500, error);
@@ -142,6 +144,7 @@ function getObject (Bucket, Key) {
       response.Body.once('end', () => resolve(responseDataChunks.join('')))
     } catch (err) {
       // Handle the error or throw
+      console.log(err)
       return reject(err)
     } 
   })
