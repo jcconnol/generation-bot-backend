@@ -21,8 +21,6 @@ for word in poems[index:]:
 		chain[key] = [word]
 	index += 1
 
-
-
 word1 = random.choice(list(chain.keys())) #random first word
 message = word1.capitalize()
 

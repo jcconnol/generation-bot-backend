@@ -54,33 +54,26 @@ exports.handler = async (event) => {
     }
 
     let params = {Bucket: 'bot-gen', Key: bucketKey}
-
     
-    
-    
-    // if(!s3Response.Body){
-    //     console.log("s3Response");
-    // }
-    // else{
-        try {
-            // const command = new GetObjectCommand(params);
-            s3Response = await getObject("bot-gen", bucketKey)
-            
-            console.log("s3Response");
-            console.log(s3Response)
+    try {
+        // const command = new GetObjectCommand(params);
+        s3Response = await getObject("bot-gen", bucketKey)
+        
+        console.log("s3Response");
+        console.log(s3Response)
 
-            let phraseArray = s3Response.split("\n||||||||||||||||||||||||||\n")
-            if (phraseArray.length < 1){
-                throw new Error('No phrases were returned')
-            }
-
-            response = responses(200, {
-                phrases: phraseArray
-            });
-        } catch (error) {
-            console.log(error);
-            return responses(500, error);
+        let phraseArray = s3Response.split("\n||||||||||||||||||||||||||\n")
+        if (phraseArray.length < 1){
+            throw new Error('No phrases were returned')
         }
+
+        response = responses(200, {
+            phrases: phraseArray
+        });
+    } catch (error) {
+        console.log(error);
+        return responses(500, error);
+    }
 
     return response;
 }
