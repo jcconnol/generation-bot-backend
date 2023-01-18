@@ -11,14 +11,14 @@ exports.handler = async (event) => {
     let s3Response;
     let s3 = new AWS.S3({apiVersion: '2006-03-01'});
     let response = responses(400, "generation data not retrieved");
-    let bucketKey;
 
     var eventBody = JSON.parse(event.body);
 
     let hasMoreFields = await hasExtraFields(eventBody, {
         "category":"1",
         "wordCount":1,
-        "siteName":"1"
+        "siteName":"1",
+        "genLimit": 1
     });
 
     if(hasMoreFields){
@@ -29,34 +29,32 @@ exports.handler = async (event) => {
         return response;
     }
 
-    let category = eventBody.category;
+    let bucketKey = eventBody.category;
     let wordCount = eventBody.wordCount;
     let siteName = eventBody.siteName;
-    
-    switch(category) {
-        case "poem":
-            bucketKey = "poems.txt"
-            break;
-        case "tweets":
-            bucketKey = "tweets.txt"
-            break;
-        case "site":
-            bucketKey = `site-${siteName}.txt`
-            break;
-        case "rapSong":
-            bucketKey = "rapSongs.txt"
-            break;
-        case "rapSongs":
-            bucketKey = "rapSongs.txt"
-            break;
-        default:
-            bucketKey = ""
-    }
+    let genLimit = eventBody.genLimit;
 
-    let params = {Bucket: 'bot-gen', Key: bucketKey}
+    let approved_bucket_keys = [
+        "poems",
+        "tweets",
+        "sites",
+        "rapSongs"
+    ]
     
     try {
+
+        if (!approved_bucket_keys.includes(bucketKey)) {
+            console.log("No Phrases returned");
+            throw new Error('Not approved category!')
+        }
+    
+        bucketKey = bucketKey + ".txt"
+    
+        let params = {Bucket: 'bot-gen', Key: bucketKey}
+
         // const command = new GetObjectCommand(params);
+
+        console.log(bucketKey)
         s3Response = await getObject("bot-gen", bucketKey)
         
         console.log("s3Response");
@@ -67,6 +65,8 @@ exports.handler = async (event) => {
             console.log("No Phrases returned");
             throw new Error('No phrases were returned')
         }
+
+        phraseArray.length = genLimit;
 
         response = responses(200, JSON.stringify({
             phrases: phraseArray
