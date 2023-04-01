@@ -3,7 +3,7 @@ frameworkVersion: '2'
 
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: python3.8
   region: us-east-2
   lambdaHashingVersion: '20201221'
   iam:
@@ -15,7 +15,7 @@ provider:
 functions:
   gen-bot-api-create:
     name: dev-gen-bot
-    handler: index.handler
+    handler: index.endpoint
     events:
       - http:
           path: api/generate
