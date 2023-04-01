@@ -3,38 +3,35 @@ import datetime
 import index
 
 def main():
-    print(index.endpoint({ "bucket_path": "fish-cam"}, {}))
+    runGetDataCheck()
 
-    index.endpoint({
-         "body": JSON.stringify({
-             category: "poem",
-             wordCount: 45
-         })
-    });
-
-def runGetPoemCheck():
-     response = index.endpoint({
-         "body": JSON.stringify({
+def runGetDataCheck():
+    response = index.endpoint({
+         "body": json.dumps({
              "category": "site",
-             "wordCount": 45,
-             "siteName": "ramseysolutions"
-         })
-     });
-
-     response = index.endpoint({
-         "body": JSON.stringify({
-             "category": "tweets",
              "wordCount": 45
          })
      });
 
+    print(response)
+
     response = index.endpoint({
-        "body": JSON.stringify({
+        "body": json.dumps({
+            "category": "tweets",
+            "wordCount": 45
+        })
+    });
+
+    print(response)
+
+    response = index.endpoint({
+        "body": json.dumps({
             "category": "rapSongs",
             "wordCount": 45
         })
     });
 
+    print(response)
 
     return response
 

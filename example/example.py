@@ -1,6 +1,6 @@
 import random
 import sys
-import json 
+import json
 
 poems = open("stray_birds.txt", "r").read()
 poems = ''.join([i for i in poems if not i.isdigit()]).replace("\n\n", " ").split(' ')
@@ -13,7 +13,7 @@ count = 100 # Desired word count of output
 
 # This loop creates a dicitonary called "chain". Each key is a word, and the value of each key
 # is an array of the words that immediately followed it.
-for word in poems[index:]: 
+for word in poems[index:]:
 	key = poems[index - 1]
 	if key in chain:
 		chain[key].append(word)
@@ -34,9 +34,9 @@ while len(message.split(' ')) < count:
 with open("output.txt", "w") as file:
 	file.write(message)
 
-chain_json = json.dumps(chain, indent = 4) 
+chain_json = json.dumps(chain, indent = 4)
 with open("chain.json", "w") as file:
     file.write(chain_json)
-    
+
 output = open("output.txt","r")
 print(output.read())
