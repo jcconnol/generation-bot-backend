@@ -8,30 +8,30 @@ def main():
 def runGetDataCheck():
     response = index.endpoint({
          "body": json.dumps({
-             "category": "site",
+             "category": "songs",
              "wordCount": 45
          })
      });
 
     print(response)
 
-    response = index.endpoint({
-        "body": json.dumps({
-            "category": "tweets",
-            "wordCount": 45
-        })
-    });
+    # response = index.endpoint({
+    #     "body": json.dumps({
+    #         "category": "tweets",
+    #         "wordCount": 45
+    #     })
+    # });
 
-    print(response)
+    # print(response)
 
-    response = index.endpoint({
-        "body": json.dumps({
-            "category": "rapSongs",
-            "wordCount": 45
-        })
-    });
+    # response = index.endpoint({
+    #     "body": json.dumps({
+    #         "category": "rapSongs",
+    #         "wordCount": 45
+    #     })
+    # });
 
-    print(response)
+    # print(response)
 
     return response
 

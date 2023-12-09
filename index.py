@@ -2,11 +2,11 @@ import boto3
 import json
 from responses import response
 import random
-import os
+from botocore.exceptions import NoCredentialsError
 
 s3_client = boto3.client('s3', region_name='us-east-2')
 
-S3_BUCKET_NAME = "bot-gen"
+S3_BUCKET_NAME = "markov-chain-generations"
 
 REQUIRED_KEYS = [
     "category",
@@ -20,15 +20,18 @@ def endpoint(event):
     if not haveExtraKeys(eventBody) and haveRequiredKeys(eventBody):
         return response(400, "Incorrect keys provided")
 
-    s3_filename = ""
+    s3_folder = ""
 
     match eventBody["category"]:
         case "poems":
-            s3_filename = "poems.txt"
-        case "rapSongs":
-            s3_filename = "rapSongs.txt"
+            s3_folder = "poems/"
+            info_type = "poem"
+        case "songs":
+            s3_folder = "songs/"
+            info_type = "song"
         case "tweets":
-            s3_filename = "tweets.txt"
+            s3_folder = "tweets/"
+            info_type = "tweets"
         case _:
             return response(400, "category not recognized")
 
@@ -36,9 +39,8 @@ def endpoint(event):
         return response(400, "please provide a valid word count")
 
     try:
-        s3_data = retrieveGenerationData(s3_filename)
-
-        prase = buildPhrase(s3_data, eventBody["wordCount"])
+        print(info_type)
+        prase = retrieveGeneratedData(s3_folder, info_type)
 
         return response(200, { "phrase": prase })
 
@@ -46,15 +48,26 @@ def endpoint(event):
         print(e)
         return response(500, e)
 
-def retrieveGenerationData(filename):
-    response = s3_client.get_object(Bucket=S3_BUCKET_NAME, Key=filename)
-    bytes = response['Body'].read()
-    utf_8_object = bytes.decode('utf-8')
-    generation_json = parseGeneratedText(utf_8_object)
+def retrieveGeneratedData(folder_name, info_type):
+    s3 = boto3.client('s3')
 
-    print(generation_json)
+    try:
+        objects = s3.list_objects_v2(Bucket=S3_BUCKET_NAME, Prefix=folder_name, MaxKeys=10000)
 
-    return generation_json
+        object_count = objects.get('KeyCount', 0)
+        print(type(object_count))
+        random_object_num = random.randint(0, object_count)
+
+
+        object_name = f"{folder_name}markov_gen_{info_type}_{random_object_num}_v1.txt"
+        print(object_name)
+        object_content = s3.get_object(Bucket=S3_BUCKET_NAME, Key=object_name)['Body'].read().decode('utf-8')
+        print(object_content)
+        return object_content
+
+    except NoCredentialsError:
+        print("Credentials not available.")
+        return None
 
 def haveRequiredKeys(inputObj):
     for value in REQUIRED_KEYS:
@@ -65,31 +78,6 @@ def haveRequiredKeys(inputObj):
 
 def haveExtraKeys(inputObj):
     for key in list(inputObj.keys()):
-        print(key)
         if key not in REQUIRED_KEYS:
-            print(key)
-            print(REQUIRED_KEYS)
             return False
-
     return True
-
-def randomPropertyItem(wordObj):
-    return random.choice(list(wordObj.items()))
-
-def randomArrayElem(array):
-    return random.choice(array)
-
-def buildPhrase(wordObj, maxCount):
-    message = ""
-    randomWordArray = randomPropertyItem(wordObj)
-    randomWord = randomArrayElem(randomWordArray)
-    message = randomWord
-
-    for index in range(maxCount-1):
-        print("whatever")
-
-
-    return message
-
-def parseGeneratedText(fullString):
-    return fullString.split("\n||||||||||\n")
