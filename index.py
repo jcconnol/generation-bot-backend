@@ -8,13 +8,9 @@ s3_client = boto3.client('s3', region_name='us-east-2')
 
 S3_BUCKET_NAME = "markov-chain-generations"
 
-REQUIRED_KEYS = [
-    "category",
-    "wordCount"
-]
+REQUIRED_KEYS = ["category"]
 
 def endpoint(event):
-
     eventBody = json.loads(event["body"])
 
     if not haveExtraKeys(eventBody) and haveRequiredKeys(eventBody):

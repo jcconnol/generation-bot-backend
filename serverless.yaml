@@ -1,9 +1,9 @@
 service: generation-bot-dev
-frameworkVersion: '2'
+frameworkVersion: '3'
 
 provider:
   name: aws
-  runtime: python3.8
+  runtime: python3.10
   region: us-east-2
   lambdaHashingVersion: '20201221'
   iam:
