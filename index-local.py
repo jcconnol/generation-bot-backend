@@ -7,11 +7,10 @@ def main():
 
 def runGetDataCheck():
     response = index.endpoint({
-         "body": json.dumps({
-             "category": "songs",
-             "wordCount": 45
-         })
-     });
+        "body": json.dumps({
+            "category": "songs"
+        })
+     }, {});
 
     print(response)
 
@@ -20,7 +19,7 @@ def runGetDataCheck():
     #         "category": "tweets",
     #         "wordCount": 45
     #     })
-    # });
+    # }, {});
 
     # print(response)
 
@@ -29,7 +28,7 @@ def runGetDataCheck():
     #         "category": "rapSongs",
     #         "wordCount": 45
     #     })
-    # });
+    # }, {});
 
     # print(response)
 
